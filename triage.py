@@ -32,3 +32,50 @@ Rules:
 
 
 # ── function 1: route_review ──────────────────────────────────────────────────
+
+def route_review(review_text: str, api_key: str) -> dict:
+    """
+    Classifies a raw review into one of three categories BEFORE triaging.
+    This is called query routing — optional feature #10.
+
+    Why do this first?
+        Not every review is a bug report.
+        Some are feature requests, some are vague complaints.
+        Routing helps us decide how to handle each one differently.
+
+    Parameters:
+        review_text : the raw review string from Google Play
+        api_key     : OpenAI API key passed in from the UI — never hardcoded
+
+    Returns:
+        {"route": "bug_report", "confidence": 0.97}
+        {"route": "feature_request", "confidence": 0.85}
+        {"route": "general_complaint", "confidence": 0.91}
+    """
+    client = OpenAI(api_key=api_key)
+
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        max_tokens=50,
+        messages=[
+                    {
+                        "role": "user",
+                        "content": f"""Classify this review into exactly one category:
+                                - bug_report        : describes a crash, freeze, error, or malfunction
+                                - feature_request   : asks for something new or improved
+                                - general_complaint : vague dissatisfaction, no specific technical issue
+
+                        Reply with JSON only, no explanation:
+                        {{"route": "...", "confidence": 0.0}}
+
+                        Review: {review_text}"""
+                    }
+                ]
+            )
+    
+    raw = response.choices[0].message.content.strip()
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        print(f"Failed to parse routing response: {raw}")
+        return {"route": "bug_report", "confidence": 0.8}
