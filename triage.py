@@ -79,3 +79,103 @@ def route_review(review_text: str, api_key: str) -> dict:
     except json.JSONDecodeError:
         print(f"Failed to parse routing response: {raw}")
         return {"route": "bug_report", "confidence": 0.8}
+    
+    # ── function 2: triage_review ─────────────────────────────────────────────────
+
+    def triage_review(review_text: str, api_key: str, similar_bugs: list = None) -> dict:
+        
+        """
+    Extracts a structured bug report from a raw review text.
+    This is the main function — called once per review.
+
+    Parameters:
+        review_text  : raw review string e.g. "App crashes on Windows when exporting PDF"
+        api_key      : OpenAI API key — never hardcoded, always passed in
+        similar_bugs : list of similar past bugs (optional)
+                       used to build few-shot examples — optional feature #2
+
+    What are few-shot examples?
+        We pass 1-2 previously triaged bugs to GPT as examples.
+        This shows GPT the exact JSON format we expect for OUR domain.
+        Result: more consistent and accurate JSON output.
+
+    Returns:
+        {
+            "title":              "PDF export crashes on Windows",
+            "severity":           "critical",
+            "component":          "Export / PDF",
+            "platform":           "Windows",
+            "frequency_estimate": "high",
+            "symptom":            "app crashes during PDF export",
+            "user_impact":        "user loses all unsaved work",
+            "recommended_label":  "P0 - blocker",
+            "bug_id":             "BUG-A3F2C1",   ← added by us, not GPT
+            "description":        "app crashes during PDF export"  ← alias of symptom
+        }
+    """
+    client = OpenAI(api_key=api_key)
+
+    few_shot_text = ""
+
+    if similar_bugs:
+        few_shot_text = "Here are some examples of previously triaged bugs:\n\n"
+        for bug in similar_bugs[:2]: 
+                        example = {
+                "title":              bug.get("title",     ""),
+                "severity":           bug.get("severity",  ""),
+                "component":          bug.get("component", ""),
+                "platform":           bug.get("platform",  ""),
+                "frequency_estimate": bug.get("frequency", ""),
+            }
+    few_shot_text += f"```json\n{json.dumps(example, indent=2)}\n```\n"
+
+    user_message = f"""Triage this customer review and return the JSON bug report.
+    {few_shot_text}
+    Review:
+    \"\"\"{review_text}\"\"\"
+
+    JSON output:"""
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            max_tokens=500,    
+            messages=[
+                {
+                    "role": "system",
+                    "content": SYSTEM_PROMPT  
+                },
+                {
+                    "role": "user",
+                    "content": user_message  
+                }
+            ]
+        )
+
+        raw = response.choices[0].message.content.strip()
+
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]  
+            if raw.startswith("json"):
+                raw = raw[4:]
+
+        structured = json.loads(raw.strip())
+
+    except Exception as e:
+        print(f"[triage] error: {e}")
+        structured = {
+            "title":              "Needs manual review",
+            "severity":           "medium",
+            "component":          "Other",
+            "platform":           "Unknown",
+            "frequency_estimate": "unknown",
+            "symptom":            review_text[:150], 
+            "user_impact":        "Unknown — review manually",
+            "recommended_label":  "P3 - minor",
+        }
+
+    structured["bug_id"] = f"BUG-{uuid.uuid4().hex[:6].upper()}"
+
+    structured["description"] = structured.get("symptom", "")
+
+    return structured 
