@@ -34,24 +34,6 @@ Rules:
 # ── function 1: route_review ──────────────────────────────────────────────────
 
 def route_review(review_text: str, api_key: str) -> dict:
-    """
-    Classifies a raw review into one of three categories BEFORE triaging.
-    This is called query routing — optional feature #10.
-
-    Why do this first?
-        Not every review is a bug report.
-        Some are feature requests, some are vague complaints.
-        Routing helps us decide how to handle each one differently.
-
-    Parameters:
-        review_text : the raw review string from Google Play
-        api_key     : OpenAI API key passed in from the UI — never hardcoded
-
-    Returns:
-        {"route": "bug_report", "confidence": 0.97}
-        {"route": "feature_request", "confidence": 0.85}
-        {"route": "general_complaint", "confidence": 0.91}
-    """
     client = OpenAI(api_key=api_key)
 
     response = client.chat.completions.create(
@@ -83,39 +65,9 @@ def route_review(review_text: str, api_key: str) -> dict:
     # ── function 2: triage_review ─────────────────────────────────────────────────
 
     def triage_review(review_text: str, api_key: str, similar_bugs: list = None) -> dict:
-        
-        """
-    Extracts a structured bug report from a raw review text.
-    This is the main function — called once per review.
+        client = OpenAI(api_key=api_key)
 
-    Parameters:
-        review_text  : raw review string e.g. "App crashes on Windows when exporting PDF"
-        api_key      : OpenAI API key — never hardcoded, always passed in
-        similar_bugs : list of similar past bugs (optional)
-                       used to build few-shot examples — optional feature #2
-
-    What are few-shot examples?
-        We pass 1-2 previously triaged bugs to GPT as examples.
-        This shows GPT the exact JSON format we expect for OUR domain.
-        Result: more consistent and accurate JSON output.
-
-    Returns:
-        {
-            "title":              "PDF export crashes on Windows",
-            "severity":           "critical",
-            "component":          "Export / PDF",
-            "platform":           "Windows",
-            "frequency_estimate": "high",
-            "symptom":            "app crashes during PDF export",
-            "user_impact":        "user loses all unsaved work",
-            "recommended_label":  "P0 - blocker",
-            "bug_id":             "BUG-A3F2C1",   ← added by us, not GPT
-            "description":        "app crashes during PDF export"  ← alias of symptom
-        }
-    """
-    client = OpenAI(api_key=api_key)
-
-    few_shot_text = ""
+        few_shot_text = ""
 
     if similar_bugs:
         few_shot_text = "Here are some examples of previously triaged bugs:\n\n"
