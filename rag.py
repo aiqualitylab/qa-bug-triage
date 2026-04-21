@@ -15,3 +15,8 @@ def init_store():
         name="bug_reports",
         embedding_function=DefaultEmbeddingFunction()
     )
+
+    data = _collection.get(include=["metadatas"])
+    _all_bugs = data["metadatas"] or []
+
+    print(f"[rag] Ready — {len(_all_bugs)} bugs loaded")
