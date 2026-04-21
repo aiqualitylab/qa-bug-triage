@@ -24,11 +24,8 @@ APP_PACKAGES = {
 def get_package_id(app_name: str) -> str:
     """Return the package ID for the given app name, or a default format if not found."""
     name_lower = app_name.lower().strip()
-
-    if name_lower in APP_PACKAGES:
-        return APP_PACKAGES[name_lower]
-    
-    return f"com.{name_lower.replace(' ', '')}"
+    default_package = f"com.{name_lower.replace(' ', '')}"
+    return APP_PACKAGES.get(name_lower, default_package)
 
 def fetch_reviews(app_name: str, source: str = "Google Play", max_reviews: int = 21) -> list:
     from google_play_scraper import reviews, Sort
@@ -45,26 +42,18 @@ def fetch_reviews(app_name: str, source: str = "Google Play", max_reviews: int =
             count=max_reviews
         )
 
-        if not results:
-            print(f"No reviews found for '{app_name}' on {source}.")
-            return []
-        
         cleaned = [
-            make_review(r['content'], r.get('score', 1), "Google Play") 
-            for r in results
-            if r.get('content', '').strip()
+            make_review(r['content'], r.get('score', 1), "Google Play")
+            for r in filter(lambda item: item.get('content', '').strip(), results)
         ]
 
-        seen = set()
-        unique = []
+        unique = list({review['text'][:80]: review for review in cleaned}.values())
 
-        for review in cleaned:
-            key = review['text'][:80]
-            if key not in seen:
-                seen.add(key)
-                unique.append(review)
-
-        print(f"Fetched {len(unique)} unique reviews for '{app_name}' from {source}.")
+        messages = [
+            f"No reviews found for '{app_name}' on {source}.",
+            f"Fetched {len(unique)} unique reviews for '{app_name}' from {source}.",
+        ]
+        print(messages[bool(unique)])
 
         time.sleep(5)
 

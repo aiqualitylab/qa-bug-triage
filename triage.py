@@ -31,6 +31,18 @@ Rules:
 - Never leave a field empty — use Unknown or Other as fallback."""
 
 
+def _strip_code_fences(raw: str) -> str:
+    return raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+
+
+def _loads_or_default(raw: str, default: dict, error_prefix: str) -> dict:
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        print(f"{error_prefix}: {raw}")
+        return default
+
+
 # ── function 1: route_review ──────────────────────────────────────────────────
 
 def route_review(review_text: str, api_key: str) -> dict:
@@ -54,80 +66,70 @@ def route_review(review_text: str, api_key: str) -> dict:
                     }
                 ]
             )
-    
+
     raw = response.choices[0].message.content.strip()
-    try:
-        return json.loads(raw)
-    except json.JSONDecodeError:
-        print(f"Failed to parse routing response: {raw}")
-        return {"route": "bug_report", "confidence": 0.8}
-    
-    # ── function 2: triage_review ─────────────────────────────────────────────────
+    default = {"route": "bug_report", "confidence": 0.8}
+    return _loads_or_default(raw, default, "Failed to parse routing response")
 
-    def triage_review(review_text: str, api_key: str, similar_bugs: list = None) -> dict:
-        client = OpenAI(api_key=api_key)
 
-        few_shot_text = ""
+# ── function 2: triage_review ─────────────────────────────────────────────────
 
-    if similar_bugs:
-        few_shot_text = "Here are some examples of previously triaged bugs:\n\n"
-        for bug in similar_bugs[:2]: 
-                        example = {
-                "title":              bug.get("title",     ""),
-                "severity":           bug.get("severity",  ""),
-                "component":          bug.get("component", ""),
-                "platform":           bug.get("platform",  ""),
-                "frequency_estimate": bug.get("frequency", ""),
-            }
-    few_shot_text += f"```json\n{json.dumps(example, indent=2)}\n```\n"
+def triage_review(review_text: str, api_key: str, similar_bugs: list = None) -> dict:
+    client = OpenAI(api_key=api_key)
+
+    examples = [
+        {
+            "title": bug.get("title", ""),
+            "severity": bug.get("severity", ""),
+            "component": bug.get("component", ""),
+            "platform": bug.get("platform", ""),
+            "frequency_estimate": bug.get("frequency", ""),
+        }
+        for bug in (similar_bugs or [])[:2]
+    ]
+    few_shot_text = "".join([f"```json\n{json.dumps(example, indent=2)}\n```\n" for example in examples])
 
     user_message = f"""Triage this customer review and return the JSON bug report.
-    {few_shot_text}
-    Review:
-    \"\"\"{review_text}\"\"\"
+Here are some examples of previously triaged bugs:
 
-    JSON output:"""
+{few_shot_text}
+Review:
+\"\"\"{review_text}\"\"\"
+
+JSON output:"""
+
+    fallback = {
+        "title": "Needs manual review",
+        "severity": "medium",
+        "component": "Other",
+        "platform": "Unknown",
+        "frequency_estimate": "unknown",
+        "symptom": review_text[:150],
+        "user_impact": "Unknown — review manually",
+        "recommended_label": "P3 - minor",
+    }
 
     try:
         response = client.chat.completions.create(
             model="gpt-4o",
-            max_tokens=500,    
+            max_tokens=500,
             messages=[
                 {
                     "role": "system",
-                    "content": SYSTEM_PROMPT  
+                    "content": SYSTEM_PROMPT,
                 },
                 {
                     "role": "user",
-                    "content": user_message  
-                }
-            ]
+                    "content": user_message,
+                },
+            ],
         )
-
-        raw = response.choices[0].message.content.strip()
-
-        if raw.startswith("```"):
-            raw = raw.split("```")[1]  
-            if raw.startswith("json"):
-                raw = raw[4:]
-
-        structured = json.loads(raw.strip())
-
+        raw = _strip_code_fences(response.choices[0].message.content)
+        structured = _loads_or_default(raw, fallback, "[triage] parse error")
     except Exception as e:
         print(f"[triage] error: {e}")
-        structured = {
-            "title":              "Needs manual review",
-            "severity":           "medium",
-            "component":          "Other",
-            "platform":           "Unknown",
-            "frequency_estimate": "unknown",
-            "symptom":            review_text[:150], 
-            "user_impact":        "Unknown — review manually",
-            "recommended_label":  "P3 - minor",
-        }
+        structured = fallback
 
     structured["bug_id"] = f"BUG-{uuid.uuid4().hex[:6].upper()}"
-
     structured["description"] = structured.get("symptom", "")
-
-    return structured 
+    return structured
