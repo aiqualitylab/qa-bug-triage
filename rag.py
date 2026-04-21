@@ -20,3 +20,24 @@ def init_store():
     _all_bugs = data["metadatas"] or []
 
     print(f"[rag] Ready — {len(_all_bugs)} bugs loaded")
+
+def add_bug(bug: dict):
+       if _collection is None:
+        init_store()
+
+        bug_id = bug.get("bug_id") or f"BUG-{uuid.uuid4().hex[:6].upper()}"
+
+        text = f"{bug.get('title', '')}. {bug.get('description', '')}"
+
+        metadata = {
+            "bug_id":      bug_id,
+            "title":       str(bug.get("title",              "")),
+            "severity":    str(bug.get("severity",           "unknown")),
+            "component":   str(bug.get("component",          "unknown")),
+            "platform":    str(bug.get("platform",           "unknown")),
+            "frequency":   str(bug.get("frequency_estimate", "unknown")),
+            "description": str(bug.get("description",        ""))[:400],
+        }
+
+        _collection.upsert(ids=[bug_id], documents=[text], metadatas=[metadata])
+        _all_bugs.append(metadata)
