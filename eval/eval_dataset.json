@@ -1,42 +1,42 @@
 [
-{
+  {
     "query": "app crashes on login",
-    "expected_answer": "The app crashes when users try to log in, preventing access."
-},
-{
+    "reference_answer": "The app crashes when users try to log in, preventing access."
+  },
+  {
     "query": "slow performance on older devices",
-    "expected_answer": "The app experiences slow performance and lag on older devices, affecting usability."
-},
-{
+    "reference_answer": "The app experiences slow performance and lag on older devices, affecting usability."
+  },
+  {
     "query": "UI glitches on dark mode",
-    "expected_answer": "Users report UI glitches and misaligned elements when using the app in dark mode."
-},
-{
+    "reference_answer": "Users report UI glitches and misaligned elements when using the app in dark mode."
+  },
+  {
     "query": "frequent crashes during video playback",
-    "expected_answer": "The app frequently crashes when users attempt to play videos, disrupting the experience."
-},
-{
+    "reference_answer": "The app frequently crashes when users attempt to play videos, disrupting the experience."
+  },
+  {
     "query": "inability to save settings",
-    "expected_answer": "Users are unable to save their settings, leading to frustration and repeated configuration."
-},
-{
+    "reference_answer": "Users are unable to save their settings, leading to frustration and repeated configuration."
+  },
+  {
     "query": "notifications not working",
-    "expected_answer": "Users report that they are not receiving notifications from the app, missing important updates."
-},
-{
+    "reference_answer": "Users report that they are not receiving notifications from the app, missing important updates."
+  },
+  {
     "query": "app freezes on startup",
-    "expected_answer": "The app freezes and becomes unresponsive when users try to start it, preventing access."
-},
-{
+    "reference_answer": "The app freezes and becomes unresponsive when users try to start it, preventing access."
+  },
+  {
     "query": "battery drain issue",
-    "expected_answer": "Users experience significant battery drain when using the app, reducing device longevity."
-},
-{
+    "reference_answer": "Users experience significant battery drain when using the app, reducing device longevity."
+  },
+  {
     "query": "incompatibility with latest OS version",
-    "expected_answer": "The app is incompatible with the latest OS version, causing crashes and functionality issues."
-},
-{
+    "reference_answer": "The app is incompatible with the latest OS version, causing crashes and functionality issues."
+  },
+  {
     "query": "problems with in-app purchases",
-    "expected_answer": "Users encounter issues with in-app purchases, such as failed transactions and missing items."
-}
+    "reference_answer": "Users encounter issues with in-app purchases, such as failed transactions and missing items."
+  }
 ]
