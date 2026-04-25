@@ -73,15 +73,33 @@ with gr.Blocks(title="QA Bug Triage") as demo:
         value=""
     )
 
-    app_name_box = gr.Textbox(label="App name", value="notion")
-    max_box      = gr.Slider(5, 30, value=10, step=5, label="Max reviews")
-    collect_btn  = gr.Button("Fetch and triage", variant="primary")
-    collect_out  = gr.Markdown()
-    collect_btn.click(
-        handle_collect,
-        [app_name_box, max_box, api_key_box],
-        collect_out
-    )
+    with gr.Tabs():
+
+        with gr.TabItem("1. Collect"):
+            app_name_box = gr.Textbox(label="App name", value="notion")
+            max_box      = gr.Slider(5, 20, value=10, step=5, label="Max reviews")
+            collect_btn  = gr.Button("Fetch and triage", variant="primary")
+            collect_out  = gr.Markdown()
+            collect_btn.click(
+                handle_collect,
+                [app_name_box, max_box, api_key_box],
+                collect_out
+            )
+
+        with gr.TabItem("2. Triage"):
+            review_box = gr.Textbox(
+                label="Paste a review",
+                lines=4,
+                placeholder="App crashes every time I try to upload a photo..."
+            )
+            triage_btn = gr.Button("Triage", variant="primary")
+            triage_out = gr.Markdown()
+            triage_btn.click(
+                handle_triage,
+                [review_box, api_key_box],
+                triage_out
+            )
+
         
 if __name__ == "__main__":
     demo.launch()      
