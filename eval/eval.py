@@ -23,3 +23,29 @@ def get_answer(query, contexts,api_key):
                     }]
     )
     return response.choices[0].message.content.strip()
+
+run_eval(api_key):
+
+dataset = json.load(open(DATASET))
+
+print (f"Loaded {len(dataset)} queries from dataset")
+
+init_store()
+
+samples = []
+
+for item in dataset:
+    query = item["query"]
+    search = search_bugs(query, top_k=5)
+    contexts = [f"{b['title']}: {b['description']}" for b in bugs]
+    answer = get_answer(query, contexts, api_key)
+    samples.append({
+        "user_input": query,
+        "response": answer,
+        "reference": item["reference_answer"],
+        "retrieved_contexts": contexts
+    })
+
+    print(f" query: {query[:50]}")
+    print(f" answer: {answer[:80]}\n")
+
