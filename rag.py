@@ -45,6 +45,9 @@ def search_bugs(query: str, top_k: int = 5):
     results = _collection.query(query_texts=[query], n_results=top_k)
     sem_bugs = results.get("metadatas", [[]])[0]
 
+    if not _all_bugs:
+        return sem_bugs
+
     corpus = [f"{bug.get('title', '')}. {bug.get('description', '')}" for bug in _all_bugs]
     bm25 = BM25Okapi(corpus + [""])
     bm25_scores = bm25.get_scores(query.split())

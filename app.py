@@ -15,7 +15,12 @@ def collect_and_triage(review, api_key):
    add_bug(structured)
    return structured.get("title", "")
 
-def handle_collect(app_name, max_reviews, api_key):
+def handle_collect(app_name, max_reviews, api_key_input):
+    api_key = (api_key_input or "").strip() or os.getenv("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        yield "OPENAI_API_KEY missing. Add it to .env or enter it in the optional field."
+        return
+
     yield f"Fetching reviews for {app_name}..."
     reviews = fetch_reviews(app_name, max_reviews=int(max_reviews))
     yield f"Got {len(reviews)} reviews. Triaging..."
@@ -24,26 +29,24 @@ def handle_collect(app_name, max_reviews, api_key):
     yield f"Done — {len(reviews)} bugs saved.\n\n{output}"
 
 with gr.Blocks(title="QA Bug Triage") as demo:
-    gr.Markdown("# QA Bug Triage Pipeline\nPaste your OpenAI API key to begin.")
-    
-    default_api_key = os.getenv("OPENAI_API_KEY", "")
+    gr.Markdown("# QA Bug Triage Pipeline\nUses OPENAI_API_KEY from .env by default.")
+
     api_key_box = gr.Textbox(
-    label="OpenAI API key",
-    placeholder="sk-...",
-    type="password",
-    value=default_api_key
+        label="OpenAI API key (optional override)",
+        placeholder="Leave empty to use .env",
+        type="password",
+        value=""
     )
 
-    with gr.Tabs():
-        app_name_box = gr.Textbox(label="App name", value="notion")
-        max_box      = gr.Slider(5, 50, value=10, step=5, label="Max reviews")
-        collect_btn  = gr.Button("Fetch and triage", variant="primary")
-        collect_out  = gr.Markdown()
-        collect_btn.click(
-            handle_collect,
-            [app_name_box, max_box, api_key_box],
-            collect_out
-            )
+    app_name_box = gr.Textbox(label="App name", value="notion")
+    max_box      = gr.Slider(5, 30, value=10, step=5, label="Max reviews")
+    collect_btn  = gr.Button("Fetch and triage", variant="primary")
+    collect_out  = gr.Markdown()
+    collect_btn.click(
+        handle_collect,
+        [app_name_box, max_box, api_key_box],
+        collect_out
+    )
         
 if __name__ == "__main__":
     demo.launch()      
