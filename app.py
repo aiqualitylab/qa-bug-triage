@@ -41,6 +41,28 @@ def build_triage_output(review_text,api_key):
     output += "\n".join([f"- {b.get('title','')} [{b.get('severity','')}]" for b in similar])
     return output, structured
 
+def handle_triage(review_text, api_key_input):
+    api_key = (api_key_input or "").strip() or os.getenv("OPENAI_API_KEY", "").strip()
+    yield "Triaging review..."
+    output, structured = build_triage_output(review_text, api_key)
+    yield output
+
+    client = OpenAI(api_key=api_key)
+    stream = client.chat.completions.create(
+        model="gpt-4o",
+        max_tokens=200,
+        stream=True,
+        messages=[{
+            "role": "user",
+            "content": f"Write a 3 sentence QA incident summary:\n{json.dumps(structured, indent=2)}"
+        }]
+    )
+
+    output += "\nAI Summary:\n\n"
+    for chunk in stream:
+        output += chunk.choices[0].delta.content or ""
+        yield output
+
 with gr.Blocks(title="QA Bug Triage") as demo:
     gr.Markdown("# QA Bug Triage Pipeline\nUses OPENAI_API_KEY from .env by default.")
 
