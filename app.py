@@ -62,6 +62,40 @@ def handle_triage(review_text, api_key_input):
     for chunk in stream:
         output += chunk.choices[0].delta.content or ""
         yield output
+def build_search_output(results, query):
+    output = f"{len(results)} results for: {query}\n\n---\n"
+    output += "\n\n---\n".join([
+        f"{r.get('title','')}\n"
+        f"{r.get('severity','')} | {r.get('component','')} | {r.get('platform','')}\n"
+        f"{r.get('description','')}"
+        for r in results
+    ])
+    return output
+
+
+def get_ai_summary(results, query, api_key):
+    client  = OpenAI(api_key=api_key)
+    context = "\n".join([
+        f"- {r.get('title','')}: {r.get('description','')}"
+        for r in results
+    ])
+    resp = client.chat.completions.create(
+        model="gpt-4o",
+        max_tokens=150,
+        messages=[{
+            "role": "user",
+            "content": f"Query: {query}\nBugs:\n{context}\nSummarise in 2 sentences:"
+        }]
+    )
+    return resp.choices[0].message.content
+
+
+def handle_search(query, api_key_input):
+    api_key = (api_key_input or "").strip() or os.getenv("OPENAI_API_KEY", "").strip()
+    results = search_bugs(query, top_k=5)
+    output  = build_search_output(results, query)
+    output += f"\n\nAI Summary:\n{get_ai_summary(results, query, api_key)}"
+    return output        
 
 with gr.Blocks(title="QA Bug Triage") as demo:
     gr.Markdown("# QA Bug Triage Pipeline\nUses OPENAI_API_KEY from .env by default.")
@@ -98,6 +132,19 @@ with gr.Blocks(title="QA Bug Triage") as demo:
                 handle_triage,
                 [review_box, api_key_box],
                 triage_out
+            )
+
+        with gr.TabItem("3. Search"):
+            search_box = gr.Textbox(
+                label="Search query",
+                placeholder="login crash android"
+            )
+            search_btn = gr.Button("Search", variant="primary")
+            search_out = gr.Markdown()
+            search_btn.click(
+                handle_search,
+                [search_box, api_key_box],
+                search_out
             )
 
         
