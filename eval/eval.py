@@ -24,9 +24,9 @@ def get_answer(query, contexts,api_key):
     )
     return response.choices[0].message.content.strip()
 
-run_eval(api_key):
+def run_eval(api_key):
 
-dataset = json.load(open(DATASET))
+    dataset = json.load(open(DATASET))
 
 print (f"Loaded {len(dataset)} queries from dataset")
 
@@ -75,4 +75,27 @@ results = evaluate(
         ContextPrecision(llm = evaluator_llm)
     ]
 )
+
+df = results.to_pandas()
+print("=" * 40)
+print("RAGAS RESULTS")
+print("=" * 40)
+print(f"Faithfulness      : {df['faithfulness'].mean():.3f}")
+print(f"Answer Relevancy  : {df['answer_relevancy'].mean():.3f}")
+print(f"Context Precision : {df['context_precision'].mean():.3f}")
+print("=" * 40)
+
+json.dump({
+        "faithfulness": round(float(df['faithfulness'].mean()), 3),
+        "answer_relevancy": round(float(df['answer_relevancy'].mean()), 3),
+        "context_precision": round(float(df['context_precision'].mean()), 3),
+        }, open(RESULTS, "w"), indent=2)
+
+print (f"Saved results to eval/results.json")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run RAGAS evaluation on app reviews")
+    parser.add_argument("--api_key", required=True)
+    args = parser.parse_args()
+    run_eval(args.api_key)
 
