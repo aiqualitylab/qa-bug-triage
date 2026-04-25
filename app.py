@@ -13,3 +13,10 @@ def collect_and_triage(review, api_key):
    add_bug(structured)
    return structured.get("title", "")
 
+def handle_collect(app_name, max_reviews, api_key):
+    yield f"Fetching reviews for {app_name}..."
+    reviews = fetch_reviews(app_name, max_reviews=int(max_reviews))
+    yield f"Got {len(reviews)} reviews. Triaging..."
+    titles  = [collect_and_triage(r, api_key) for r in reviews]
+    output  = "\n".join([f"{i+1}. {t}" for i, t in enumerate(titles)])
+    yield f"Done — {len(reviews)} bugs saved.\n\n{output}"
