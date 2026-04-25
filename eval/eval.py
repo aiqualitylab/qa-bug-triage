@@ -3,6 +3,9 @@ import os
 import json
 import sys
 import argparse
+from dotenv import load_dotenv
+
+load_dotenv()
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -87,6 +90,11 @@ def run_eval(api_key):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--api-key", required=True)
+    parser.add_argument("--api-key", default=os.getenv("OPENAI_API_KEY"))
     args = parser.parse_args()
+    
+    if not args.api_key:
+        print("Error: OPENAI_API_KEY not found. Set it in .env or pass --api-key")
+        sys.exit(1)
+    
     run_eval(args.api_key)
