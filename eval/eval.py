@@ -49,3 +49,30 @@ for item in dataset:
     print(f" query: {query[:50]}")
     print(f" answer: {answer[:80]}\n")
 
+from ragas import evaluate, EvalutionDataset, SingleTurnSample
+from ragas.metrics import Faithfulness, AnswerRelevancy, ContextPrecision
+from ragas.llms import LlamaIndexLLMWrapper
+from llama_index.llms.openai import OpenAI as LlamaOpenAI
+
+llm = LlamaIndexLLMWrapper(LlamaOpenAI(api_key=api_key, model   ="gpt-4o"))
+evaluator_llm = LlamaIndexLLMWrapper(llm)
+
+ragas_samples = [
+    SingleTurnSample(
+            user_input=s["user_input"],
+            response=s["response"],
+            retrieved_contexts=s["retrieved_contexts"],
+            reference=s["reference"]
+    )
+    for s in samples
+]
+
+results = evaluate(
+    EvalutionDataset(samples = ragas_samples),
+    metrics = [
+        Faithfulness(llm = evaluator_llm),
+        AnswerRelevancy(llm = evaluator_llm),
+        ContextPrecision(llm = evaluator_llm)
+    ]
+)
+
