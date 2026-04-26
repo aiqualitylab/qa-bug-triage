@@ -141,7 +141,7 @@ def handle_clear_bugs():
     return f"Cleared {removed} bug(s)."
 
 with gr.Blocks(title="QA Bug Triage") as demo:
-    gr.Markdown("# QA Bug Triage Pipeline\nBYOK in UI.")
+    gr.Markdown("# QA Bug Triage Pipeline\nA modern RAG workflow for turning messy app reviews into structured, searchable QA bug intelligence..")
 
     api_key_box = gr.Textbox(
         label="OpenAI API key (BYOK)",

@@ -6,7 +6,7 @@
 
 ## Overview
 
-QA teams often receive product feedback as noisy, repetitive, and unstructured review text. This project converts those reviews into structured bug reports with an LLM, stores them in a local vector database, and makes them easy to search and summarize.
+Teams often receive product feedback as noisy, repetitive, and unstructured review text. This project converts those reviews into structured bug reports with an LLM, stores them in a local vector database, and makes them easy to search and summarize.
 
 The result is a lightweight bug triage assistant built with Python, Gradio, OpenAI, ChromaDB, and RAG evaluation tooling.
 
