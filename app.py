@@ -2,16 +2,23 @@ import json
 import gradio as gr
 from openai import OpenAI
 from collect import fetch_reviews
-from triage import triage_review
+from triage import route_review, triage_review
 from rag import init_store, add_bug, search_bugs, clear_store
 
 init_store()
 
 def collect_and_triage(review, api_key):
-   similar = search_bugs(review["text"], top_k=2)
-   structured = triage_review(review["text"], api_key, similar_bugs=similar)
-   add_bug(structured)
-   return structured.get("title", "")
+    review_text = review["text"]
+    route_data = route_review(review_text, api_key)
+    route = route_data.get("route", "bug_report")
+
+    if route != "bug_report":
+        return None, route
+
+    similar = search_bugs(review_text, top_k=2)
+    structured = triage_review(review_text, api_key, similar_bugs=similar)
+    add_bug(structured)
+    return structured.get("title", ""), route
 
 def handle_collect(app_name, max_reviews, api_key_input):
     api_key = (api_key_input or "").strip()
@@ -22,11 +29,35 @@ def handle_collect(app_name, max_reviews, api_key_input):
     yield f"Fetching reviews for {app_name}..."
     reviews = fetch_reviews(app_name, max_reviews=int(max_reviews))
     yield f"Got {len(reviews)} reviews. Triaging..."
-    titles  = [collect_and_triage(r, api_key) for r in reviews]
-    output  = "\n".join([f"{i+1}. {t}" for i, t in enumerate(titles)])
-    yield f"Done — {len(reviews)} bugs saved.\n\n{output}"
+
+    titles = []
+    skipped = {"feature_request": 0, "general_complaint": 0}
+    for review in reviews:
+        title, route = collect_and_triage(review, api_key)
+        if route == "bug_report" and title:
+            titles.append(title)
+        elif route in skipped:
+            skipped[route] += 1
+
+    output = "\n".join([f"{i+1}. {t}" for i, t in enumerate(titles)])
+    yield (
+        f"Done — {len(titles)} bugs saved. "
+        f"Skipped: {skipped['feature_request']} feature request(s), "
+        f"{skipped['general_complaint']} general complaint(s).\n\n{output}"
+    )
 
 def build_triage_output(review_text,api_key):
+    route_data = route_review(review_text, api_key)
+    route = route_data.get("route", "bug_report")
+
+    if route != "bug_report":
+        confidence = route_data.get("confidence", 0)
+        output = (
+            f"Route: {route} (confidence: {confidence})\n\n"
+            "This input is not a bug report, so it was not added to bug store."
+        )
+        return output, None
+
     similar = search_bugs(review_text, top_k=2)
     structured = triage_review(review_text, api_key, similar_bugs=similar)
     add_bug(structured)
@@ -46,6 +77,9 @@ def handle_triage(review_text, api_key_input):
     yield "Triaging review..."
     output, structured = build_triage_output(review_text, api_key)
     yield output
+
+    if not structured:
+        return
 
     client = OpenAI(api_key=api_key)
     stream = client.chat.completions.create(
