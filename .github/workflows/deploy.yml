@@ -1,0 +1,19 @@
+name : Deploy to Hugging Face Space
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+ deploy:
+   runs-on: ubuntu-latest
+
+   steps:
+   - name: Checkout repository
+     uses: actions/checkout@v4
+
+   - name: Build deploy bundle
+     run: |
+       rm -rf .hf-deploy
+       mkdir -p .hf-deploy/eval   
