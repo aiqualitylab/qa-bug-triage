@@ -1,11 +1,3 @@
----
-title: QA-Bug-Triage
-sdk: gradio
-emoji: 🏆
-colorFrom: red
-colorTo: yellow
----   
-
 # QA Bug Triage Pipeline
 
 Simple RAG app for QA teams.

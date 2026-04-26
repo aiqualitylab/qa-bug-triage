@@ -23,7 +23,6 @@ jobs:
        cp triage.py .hf-deploy/
        cp rag.py .hf-deploy/
        cp requirements.txt .hf-deploy/
-       cp README.md .hf-deploy/
 
        cp eval/eval.py .hf-deploy/eval/
        cp eval/eval_dataset.json .hf-deploy/eval/
