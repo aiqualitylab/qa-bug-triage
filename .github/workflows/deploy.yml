@@ -42,7 +42,7 @@ jobs:
         git add -A
         git commit -m "Deploy to Hugging Face Space"
 
-        HF_REMOTE="https://huggingface.co/spaces/aiqualitylab/qa-bug-triage.git"
+        HF_REMOTE="https://aiqualitylab:${HF_TOKEN}@huggingface.co/spaces/aiqualitylab/qa-bug-triage.git"
 
         git branch -M main
         git remote add hf "$HF_REMOTE"
