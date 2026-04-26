@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from collect import fetch_reviews
 from triage import triage_review
-from rag import init_store, add_bug, search_bugs
+from rag import init_store, add_bug, search_bugs, clear_store
 
 load_dotenv()
 
@@ -95,7 +95,13 @@ def handle_search(query, api_key_input):
     results = search_bugs(query, top_k=5)
     output  = build_search_output(results, query)
     output += f"\n\nAI Summary:\n{get_ai_summary(results, query, api_key)}"
-    return output        
+    return output
+
+
+def handle_clear_bugs():
+    removed = clear_store()
+    init_store()
+    return f"Cleared {removed} bug(s)."
 
 with gr.Blocks(title="QA Bug Triage") as demo:
     gr.Markdown("# QA Bug Triage Pipeline\nUses OPENAI_API_KEY from .env by default.")
@@ -145,6 +151,14 @@ with gr.Blocks(title="QA Bug Triage") as demo:
                 handle_search,
                 [search_box, api_key_box],
                 search_out
+            )
+
+        with gr.TabItem("4. Clear bugs"):
+            clear_btn = gr.Button("Clear stored bugs", variant="stop")
+            clear_out = gr.Markdown()
+            clear_btn.click(
+                handle_clear_bugs,
+                outputs=clear_out
             )
 
         

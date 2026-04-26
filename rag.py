@@ -68,3 +68,17 @@ def search_bugs(query: str, top_k: int = 5):
     )
 
     return [bug_by_id[bug_id] for bug_id in ranked_ids[:top_k]]
+
+
+def clear_store():
+    global _all_bugs
+
+    init_store()
+    data = _collection.get()
+    ids = data.get("ids", []) or []
+
+    if ids:
+        _collection.delete(ids=ids)
+
+    _all_bugs = []
+    return len(ids)
