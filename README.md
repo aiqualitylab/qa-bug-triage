@@ -1,129 +1,170 @@
 # QA Bug Triage Pipeline
 
-Simple RAG app for QA teams.
+> A modern RAG workflow for turning messy app reviews into structured, searchable QA bug intelligence.
 
-This app collects app-store reviews, converts them into structured bug reports with an LLM, stores them in a vector database, and lets you search and summarize bugs.
+[Hugging Face Space](https://huggingface.co/spaces/aiqualitylab/qa-bug-triage) · [GitHub Repository](https://github.com/aiqualitylab/qa-bug-triage)
+
+## Overview
+
+QA teams often receive product feedback as noisy, repetitive, and unstructured review text. This project converts those reviews into structured bug reports with an LLM, stores them in a local vector database, and makes them easy to search and summarize.
+
+The result is a lightweight bug triage assistant built with Python, Gradio, OpenAI, ChromaDB, and RAG evaluation tooling.
+
+## What It Does
+
+| Capability | Description |
+| --- | --- |
+| Review collection | Fetches real Google Play reviews |
+| Query routing | Classifies incoming text before triage |
+| Structured triage | Generates JSON bug reports with consistent fields |
+| Hybrid retrieval | Combines semantic retrieval with BM25 keyword matching |
+| AI summaries | Produces concise summaries for triage and search results |
+| Store reset | Clears persisted bugs directly from the UI |
 
 ## Live Demo
 
-Hugging Face Space (public): https://huggingface.co/spaces/aiqualitylab/qa-bug-triage
+- Hugging Face Space: https://huggingface.co/spaces/aiqualitylab/qa-bug-triage
+- GitHub Repo: https://github.com/aiqualitylab/qa-bug-triage
 
-GitHub Repo: https://github.com/aiqualitylab/qa-bug-triage
+## Why This Project
 
-## Problem It Solves
+Instead of manually scanning reviews, QA engineers can:
 
-Review data is noisy and unstructured. This app helps convert user feedback into searchable bug intelligence.
+1. collect feedback from a live source,
+2. turn it into structured bug records,
+3. search recurring issues faster,
+4. summarize findings for triage and reporting.
 
 ## Core Features
 
 1. Collect real Google Play reviews.
-2. Triage reviews into JSON bug reports.
-3. Store bugs in ChromaDB.
-4. Search using hybrid retrieval (semantic plus BM25).
-5. Generate short AI summaries for triage and search results.
-6. Clear all stored bugs from UI.
-7. Route review text before triage (bug report vs feature request vs general complaint).
+2. Route each review as bug report, feature request, or general complaint.
+3. Triage bug reports into structured JSON.
+4. Store bug data in ChromaDB.
+5. Search with hybrid retrieval using semantic search plus BM25.
+6. Generate short AI summaries for triage and search results.
+7. Clear stored bugs from the UI.
 
 ## Tech Stack
 
-1. Python
-2. Gradio UI
-3. OpenAI GPT-4o
-4. ChromaDB
-5. rank-bm25
-6. RAGAS (evaluation)
+- Python
+- Gradio
+- OpenAI GPT-4o
+- ChromaDB
+- rank-bm25
+- RAGAS
 
-## API Keys Required
+## API Keys
+
+Required:
 
 1. OpenAI API key
 
-Important:
-1. Do not commit API keys.
-2. This project uses BYOK in UI (user pastes key in app).
+Notes:
+
+1. The app uses BYOK in the UI.
+2. The key input is masked.
+3. Do not commit API keys into the repository.
 
 ## Quick Start
 
-1. Create and activate virtual environment.
-2. Install dependencies.
-3. Run app.
+### Windows PowerShell
 
-Windows PowerShell example:
-
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 python app.py
+```
 
 ## How To Use
 
-1. Open the local Gradio URL after running app.py.
-2. Paste your OpenAI API key in the masked BYOK field.
-3. Use tab 1 Collect to fetch and triage reviews.
-4. Use tab 2 Triage for one custom review.
-5. Use tab 3 Search to retrieve related bugs.
-6. Use tab 4 Clear bugs to reset the store.
+1. Open the local Gradio URL after starting the app.
+2. Paste your OpenAI API key into the masked BYOK field.
+3. Use `Collect` to fetch and triage live reviews.
+4. Use `Triage` to analyze one custom review.
+5. Use `Search` to retrieve similar bugs.
+6. Use `Clear bugs` to reset the store.
 
 ## Project Structure
 
-1. app.py: Gradio app and workflows.
-2. collect.py: Google Play review collection.
-3. triage.py: Structured JSON bug extraction.
-4. rag.py: Chroma storage and hybrid search.
-5. eval/eval.py: RAG evaluation script.
-6. eval/eval_dataset.json: Evaluation dataset.
+```text
+app.py                  # Gradio app and interaction flows
+collect.py              # Google Play review collection
+triage.py               # Routing and structured triage logic
+rag.py                  # Chroma storage and hybrid retrieval
+eval/eval.py            # RAG evaluation script
+eval/eval_dataset.json  # Evaluation dataset
+eval/results.json       # Latest saved evaluation metrics
+```
 
 ## Evaluation
 
-This project includes:
-1. Evaluation script in eval/eval.py
-2. Evaluation dataset in eval/eval_dataset.json
-3. Metrics: Faithfulness, Answer Relevancy, Context Precision
+Included assets:
+
+1. Evaluation script in `eval/eval.py`
+2. Evaluation dataset in `eval/eval_dataset.json`
+3. Saved metrics in `eval/results.json`
 
 Run evaluation:
 
+```powershell
 python eval\eval.py --api-key YOUR_OPENAI_API_KEY
+```
 
 Latest results:
- Faithfulness      : 0.243
- Answer Relevancy  : 0.724
- Context Precision : 0.050 
 
-## Cost Estimate (Target: $0.50 or less)
+| Metric | Score |
+| --- | ---: |
+| Faithfulness | 0.243 |
+| Answer Relevancy | 0.724 |
+| Context Precision | 0.050 |
 
-Typical low-cost demo session:
-1. 1 collect run with 5 reviews
-2. 1 manual triage
-3. 2 search summaries
+## Cost Estimate
 
-Estimated OpenAI usage:
-1. Around 8k to 20k tokens total depending on review length
-2. Estimated cost is typically below $0.50 for a short demo session
+Target: under $0.50 for a short demo session.
+
+Typical low-cost session:
+
+1. One collect run with 5 reviews
+2. One manual triage
+3. Two search summaries
+
+Expected usage:
+
+1. Around 8k to 20k tokens depending on review length
+2. Typically under $0.50 for a short test session
 
 Tips to keep cost low:
-1. Keep max reviews at 5 to 10
+
+1. Keep max reviews between 5 and 10
 2. Avoid repeated large collect runs
-3. Use short test inputs for triage/search checks
+3. Use short test inputs for validation
 
 ## Functionalities Implemented
 
-Necessary constraints covered:
+### Requirements Covered
+
 1. RAG project written in Python
-2. Uses at least one LLM (OpenAI)
-3. Public repository with data collection and curation scripts
+2. Uses at least one LLM
+3. Public repository with collection and curation scripts
 4. README with project explanation and setup
-5. BYOK input in UI (masked OpenAI key field)
-6. Cost estimate section under $0.50 target for short demo usage
+5. BYOK input in the UI
+6. Cost estimate included
 7. API key requirements listed
-8. Optional techniques list included (at least 5)
-9. Streaming responses in UI.
-10. Dynamic few-shot prompting using similar bugs.
-11. Evaluation code and dataset included.
-12. Domain-specific app (QA bug triage).
-13. Structured JSON data curation for advanced RAG.
-14. Hybrid search (semantic plus BM25).
-15. Query routing in active app flow (non-bug routes are skipped in storage).
+8. More than 5 optional techniques covered
+
+### Techniques Implemented
+
+1. Streaming responses in the UI
+2. Dynamic few-shot prompting using similar bugs
+3. Evaluation code and dataset included
+4. Domain-specific app for QA bug triage
+5. Structured JSON data curation for RAG
+6. Hybrid retrieval with semantic search and BM25
+7. Query routing in the active app flow
 
 ## Data Sources
 
-1. Google Play Store reviews via google-play-scraper.
-2. User-entered custom review text in the app.
+1. Google Play Store reviews via `google-play-scraper`
+2. User-entered custom review text in the app
