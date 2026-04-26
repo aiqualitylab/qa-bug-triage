@@ -84,9 +84,9 @@ python eval\eval.py --api-key YOUR_OPENAI_API_KEY
 
 Latest results:
 1. Add your latest metric values here before submission.
-2. Faithfulness: 
-3. Answer Relevancy: 
-4. Context Precision: 
+2. Faithfulness      : 0.243
+3. Answer Relevancy  : 0.724
+4. Context Precision : 0.050 
 
 ## Cost Estimate (Target: $0.50 or less)
 
