@@ -1,14 +1,10 @@
 ---
-title: QA Bug Triage
+title: QA-Bug-Triage
+sdk: gradio
 emoji: 🏆
 colorFrom: red
 colorTo: yellow
-sdk: gradio
-sdk_version: "6.12.0"
-python_version: "3.10"
-app_file: app.py
-pinned: false
----    
+---   
 
 # QA Bug Triage Pipeline
 
