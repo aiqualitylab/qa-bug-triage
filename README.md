@@ -6,7 +6,7 @@ This app collects app-store reviews, converts them into structured bug reports w
 
 ## Live Demo
 
-Hugging Face Space (public): 
+Hugging Face Space (public): https://huggingface.co/spaces/aiqualitylab/qa-bug-triage
 
 GitHub Repo: https://github.com/aiqualitylab/qa-bug-triage
 
