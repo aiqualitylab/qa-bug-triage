@@ -104,17 +104,7 @@ Tips to keep cost low:
 2. Avoid repeated large collect runs
 3. Use short test inputs for triage/search checks
 
-## Optional Functionalities Implemented
-
-1. Streaming responses in UI.
-2. Dynamic few-shot prompting using similar bugs.
-3. Evaluation code and dataset included.
-4. Domain-specific app (QA bug triage).
-5. Structured JSON data curation for advanced RAG.
-6. Hybrid search (semantic plus BM25).
-7. Query routing in active app flow (non-bug routes are skipped in storage).
-
-## Checklist Mapping
+## Functionalities Implemented
 
 Necessary constraints covered:
 1. RAG project written in Python
@@ -125,6 +115,13 @@ Necessary constraints covered:
 6. Cost estimate section under $0.50 target for short demo usage
 7. API key requirements listed
 8. Optional techniques list included (at least 5)
+9. Streaming responses in UI.
+10. Dynamic few-shot prompting using similar bugs.
+11. Evaluation code and dataset included.
+12. Domain-specific app (QA bug triage).
+13. Structured JSON data curation for advanced RAG.
+14. Hybrid search (semantic plus BM25).
+15. Query routing in active app flow (non-bug routes are skipped in storage).
 
 ## Data Sources
 
