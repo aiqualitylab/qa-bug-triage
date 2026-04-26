@@ -1,13 +1,9 @@
-import os
 import json
 import gradio as gr
-from dotenv import load_dotenv
 from openai import OpenAI
 from collect import fetch_reviews
 from triage import triage_review
 from rag import init_store, add_bug, search_bugs, clear_store
-
-load_dotenv()
 
 init_store()
 
@@ -18,9 +14,9 @@ def collect_and_triage(review, api_key):
    return structured.get("title", "")
 
 def handle_collect(app_name, max_reviews, api_key_input):
-    api_key = (api_key_input or "").strip() or os.getenv("OPENAI_API_KEY", "").strip()
+    api_key = (api_key_input or "").strip()
     if not api_key:
-        yield "OPENAI_API_KEY missing. Add it to .env or enter it in the optional field."
+        yield "OpenAI API key is required for BYOK."
         return
 
     yield f"Fetching reviews for {app_name}..."
@@ -42,7 +38,11 @@ def build_triage_output(review_text,api_key):
     return output, structured
 
 def handle_triage(review_text, api_key_input):
-    api_key = (api_key_input or "").strip() or os.getenv("OPENAI_API_KEY", "").strip()
+    api_key = (api_key_input or "").strip()
+    if not api_key:
+        yield "OpenAI API key is required for BYOK."
+        return
+
     yield "Triaging review..."
     output, structured = build_triage_output(review_text, api_key)
     yield output
@@ -91,7 +91,10 @@ def get_ai_summary(results, query, api_key):
 
 
 def handle_search(query, api_key_input):
-    api_key = (api_key_input or "").strip() or os.getenv("OPENAI_API_KEY", "").strip()
+    api_key = (api_key_input or "").strip()
+    if not api_key:
+        return "OpenAI API key is required for BYOK."
+
     results = search_bugs(query, top_k=5)
     output  = build_search_output(results, query)
     output += f"\n\nAI Summary:\n{get_ai_summary(results, query, api_key)}"
@@ -104,11 +107,11 @@ def handle_clear_bugs():
     return f"Cleared {removed} bug(s)."
 
 with gr.Blocks(title="QA Bug Triage") as demo:
-    gr.Markdown("# QA Bug Triage Pipeline\nUses OPENAI_API_KEY from .env by default.")
+    gr.Markdown("# QA Bug Triage Pipeline\nBYOK in UI.")
 
     api_key_box = gr.Textbox(
-        label="OpenAI API key (optional override)",
-        placeholder="Leave empty to use .env",
+        label="OpenAI API key (BYOK)",
+        placeholder="sk-...",
         type="password",
         value=""
     )
