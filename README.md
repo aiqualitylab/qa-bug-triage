@@ -83,26 +83,9 @@ Run evaluation:
 python eval\eval.py --api-key YOUR_OPENAI_API_KEY
 
 Latest results:
-1. Add your latest metric values here before submission.
-2. Faithfulness      : 0.243
-3. Answer Relevancy  : 0.724
-4. Context Precision : 0.050 
-
-## Cost Estimate (Target: $0.50 or less)
-
-Typical low-cost demo session:
-1. 1 collect run with 5 reviews
-2. 1 manual triage
-3. 2 search summaries
-
-Estimated OpenAI usage:
-1. Around 8k to 20k tokens total depending on review length.
-2. Estimated cost is typically below $0.50 for a short demo session.
-
-Tips to keep cost low:
-1. Use max reviews = 5 to 10.
-2. Avoid repeated large collect runs.
-3. Use shorter review text during testing.
+ Faithfulness      : 0.243
+ Answer Relevancy  : 0.724
+ Context Precision : 0.050 
 
 ## Optional Functionalities Implemented
 
