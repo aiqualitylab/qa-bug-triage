@@ -1,14 +1,10 @@
-   - name: Write Hugging Face Space README
-     run: |
-       python3 << 'PYEOF'
-       content = """\
 ---
 title: QA Bug Triage
 emoji: 🐛
 colorFrom: red
 colorTo: yellow
 sdk: gradio
-sdk_version: "4.44.0"
+sdk_version: "6.12.0"
 python_version: "3.10"
 app_file: app.py
 pinned: false
