@@ -114,7 +114,7 @@ Tips to keep cost low:
 6. Hybrid search (semantic plus BM25).
 7. Query routing in active app flow (non-bug routes are skipped in storage).
 
-## Final Project Checklist Mapping
+## Checklist Mapping
 
 Necessary constraints covered:
 1. RAG project written in Python
