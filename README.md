@@ -8,7 +8,7 @@ This app collects app-store reviews, converts them into structured bug reports w
 
 Hugging Face Space (public): 
 
-GitHub Repo: 
+GitHub Repo: https://github.com/aiqualitylab/qa-bug-triage
 
 ## Problem It Solves
 
@@ -22,6 +22,7 @@ Review data is noisy and unstructured. This app helps convert user feedback into
 4. Search using hybrid retrieval (semantic plus BM25).
 5. Generate short AI summaries for triage and search results.
 6. Clear all stored bugs from UI.
+7. Route review text before triage (bug report vs feature request vs general complaint).
 
 ## Tech Stack
 
@@ -87,6 +88,22 @@ Latest results:
  Answer Relevancy  : 0.724
  Context Precision : 0.050 
 
+## Cost Estimate (Target: $0.50 or less)
+
+Typical low-cost demo session:
+1. 1 collect run with 5 reviews
+2. 1 manual triage
+3. 2 search summaries
+
+Estimated OpenAI usage:
+1. Around 8k to 20k tokens total depending on review length
+2. Estimated cost is typically below $0.50 for a short demo session
+
+Tips to keep cost low:
+1. Keep max reviews at 5 to 10
+2. Avoid repeated large collect runs
+3. Use short test inputs for triage/search checks
+
 ## Optional Functionalities Implemented
 
 1. Streaming responses in UI.
@@ -95,7 +112,19 @@ Latest results:
 4. Domain-specific app (QA bug triage).
 5. Structured JSON data curation for advanced RAG.
 6. Hybrid search (semantic plus BM25).
-7. Query routing helper available in code.
+7. Query routing in active app flow (non-bug routes are skipped in storage).
+
+## Final Project Checklist Mapping
+
+Necessary constraints covered:
+1. RAG project written in Python
+2. Uses at least one LLM (OpenAI)
+3. Public repository with data collection and curation scripts
+4. README with project explanation and setup
+5. BYOK input in UI (masked OpenAI key field)
+6. Cost estimate section under $0.50 target for short demo usage
+7. API key requirements listed
+8. Optional techniques list included (at least 5)
 
 ## Data Sources
 
