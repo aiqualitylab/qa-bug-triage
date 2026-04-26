@@ -1,3 +1,7 @@
+   - name: Write Hugging Face Space README
+     run: |
+       python3 << 'PYEOF'
+       content = """\
 ---
 title: QA Bug Triage
 emoji: 🐛
@@ -8,7 +12,7 @@ sdk_version: "4.44.0"
 python_version: "3.10"
 app_file: app.py
 pinned: false
----     
+---    
 
 # QA Bug Triage Pipeline
 
