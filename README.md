@@ -1,6 +1,6 @@
 ---
 title: QA Bug Triage
-emoji: 🐛
+emoji: 🏆
 colorFrom: red
 colorTo: yellow
 sdk: gradio
