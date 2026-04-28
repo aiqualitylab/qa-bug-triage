@@ -121,11 +121,11 @@ python eval\eval.py --api-key YOUR_OPENAI_API_KEY
 
 **Latest results:**
 
-| Metric | Score | |
-|---|---|---|
-| Answer Relevancy | `0.724` |
-| Faithfulness | `0.243` |
-| Context Precision | `0.050` |
+| Metric | Score |
+|---|---|
+| Answer Relevancy | `0.868` |
+| Faithfulness | `0.292` |
+| Context Precision | `0.020` |
 
 ---
 

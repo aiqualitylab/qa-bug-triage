@@ -49,7 +49,8 @@ def search_bugs(query: str, top_k: int = 5):
         return sem_bugs
 
     corpus = [f"{bug.get('title', '')}. {bug.get('description', '')}" for bug in _all_bugs]
-    bm25 = BM25Okapi(corpus + [""])
+    tokenized_corpus = [doc.split() for doc in corpus]
+    bm25 = BM25Okapi(tokenized_corpus)
     bm25_scores = bm25.get_scores(query.split())
     bm25_indices = sorted(range(len(_all_bugs)), key=lambda i: bm25_scores[i], reverse=True)[:top_k]
     bm25_bugs = [_all_bugs[i] for i in bm25_indices]
